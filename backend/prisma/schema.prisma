@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @default(autoincrement()) @id
+  email String  @unique
+  password String
+  refreshTokens RefreshToken[]
+  createdAT DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name  String?
+  posts Post[]
+}
+
+model RefreshToken {
+  id String @id @unique @default(uuid())
+  hashedToken String @unique
+  userId Int
+  User User @relation(fields: [userId], references:[id], onDelete: Cascade)
+  revoked Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expireAt DateTime
+}
+
+model Post {
+  // standard fields
+  id        String     @id @default(cuid()) 
+  title     String
+  content   String?
+  published Boolean @default(false)
+  author    User?   @relation(fields: [authorId], references: [id])
+  authorId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  // date scheduling
+  scheduledFor DateTime @default(now())
+
+  // Labels/categories 
+  labels Label[]
+
+  // File attachements
+  attachements Attachement?
+
+
+}
+
+enum TaskStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Label{
+  id String @id @default(cuid())
+  name String
+  color String? 
+
+  posts Post[]
+}
+
+model Attachement {
+  id String @id @default(cuid())
+  filename String
+  path String
+  // file format : jpeg/png/pdf...
+  mimetype String
+  size Int 
+  uploadedAt DateTime @default(now())
+
+  // relationship to the post
+  postId String @unique
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
