@@ -78,19 +78,15 @@ const TaskManager = () => {
         return !isSameOrFutureDate(task.scheduledFor);
       });
 
-      // Only delete overdue tasks
       overdueTasks.forEach((task) => {
-        console.log(`Deleting overdue task: ${task.title}`);
         handleDelete(task.id);
       });
-    }, 1000); // every 60 seconds
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [tasks]);
-  useEffect(() => {
-    console.log("showLabelsDropdown updated:", showLabelsDropdown);
-  }, [showLabelsDropdown]);
-  // Fetch tasks from the API
+  useEffect(() => {}, [showLabelsDropdown]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -100,11 +96,10 @@ const TaskManager = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("this is from useeffect", response.data.blogs);
 
         const processedTasks = response.data.blogs.map((task) => ({
           ...task,
-          // Handle both object and string labels
+
           labels: task.labels.map((label) =>
             typeof label === "object" ? label.name : label
           ),
@@ -141,8 +136,6 @@ const TaskManager = () => {
   }, []);
 
   const handleDateSelect = (selectedDate, isEditing) => {
-    console.log("Selected date:", selectedDate);
-
     if (isEditing) {
       setEditedTask((prev) => ({
         ...prev,
@@ -157,17 +150,11 @@ const TaskManager = () => {
     setIsDatePickerOpen(false);
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const token = localStorage.getItem("accessToken");
-
-      console.log("this is the labels", newTask.labels);
 
       await axios.post(
         "http://localhost:8080/post",
@@ -217,7 +204,7 @@ const TaskManager = () => {
         ...editedTask,
         scheduledFor: editedTask.scheduledFor || new Date().toISOString(),
         published: true,
-        labels: editedTask.labels.map((label) => ({ name: label })), // Convert to proper format
+        labels: editedTask.labels.map((label) => ({ name: label })),
       };
 
       await axios.put(`http://localhost:8080/put/${editedTask.id}`, payload, {
@@ -226,7 +213,6 @@ const TaskManager = () => {
         },
       });
 
-      // Refresh tasks
       const response = await axios.get("http://localhost:8080/getAll", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -235,7 +221,6 @@ const TaskManager = () => {
 
       const processedTasks = response.data.blogs.map((task) => ({
         ...task,
-        // Handle both object and string labels
         labels: task.labels.map((label) =>
           typeof label === "object" ? label.name : label
         ),
@@ -266,7 +251,7 @@ const TaskManager = () => {
       });
       const processedTasks = response.data.blogs.map((task) => ({
         ...task,
-        labels: task.labels.map((label) => label.name), // Extract label names
+        labels: task.labels.map((label) => label.name),
       }));
       setTasks(processedTasks);
 
@@ -319,7 +304,6 @@ const TaskManager = () => {
       const newLabel = newLabelInput.trim();
       setAvailableLabels([...availableLabels, newLabel]);
 
-      // Add the new label to the current task being edited/created
       if (editingTask) {
         setEditedTask({
           ...editedTask,
@@ -338,8 +322,6 @@ const TaskManager = () => {
   };
 
   const handleLabelSelection = (label) => {
-    console.log("this is from handle label selection", label);
-
     if (editingTask) {
       setEditedTask((prev) => ({
         ...prev,
@@ -387,12 +369,12 @@ const TaskManager = () => {
       const token = localStorage.getItem("accessToken");
       const res = await fetch(`http://localhost:8080/get/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`, // ensure this is set
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await res.json();
-      console.log("im fromn details", data);
+
       setSelectedTask({
         ...data,
         labels: data.labels.map((label) => label?.name || label),
@@ -402,8 +384,8 @@ const TaskManager = () => {
     }
   };
 
+  // filtering tasks function
   const filteredTasks = tasks.filter((task) => {
-    // First apply the date filter
     let dateFilterPassed = true;
     if (selectedFilter !== "all" && task.scheduledFor) {
       const taskDate = new Date(task.scheduledFor);
@@ -436,9 +418,6 @@ const TaskManager = () => {
     return dateFilterPassed && labelFilterPassed;
   });
 
-  // const filteredTasks = selectedLabelFilter === 'all'
-  // ? tasks
-  // : tasks.filter(task => task.labels?.includes(selectedLabelFilter));
   return (
     <div className="flex h-screen bg-neutral-400">
       {/* Sidebar */}
@@ -658,7 +637,6 @@ const TaskManager = () => {
                             variant="outline"
                             className="bg-gray-800 border-gray-700 text-gray-300 rounded-full text-sm"
                           >
-                            {/* <Tag className="h-4 w-4 mr-1 text-blue-500" /> */}
                             Select Labels
                             <ChevronDown className="ml-1 h-4 w-4" />
                           </Button>
@@ -670,11 +648,6 @@ const TaskManager = () => {
                                 key={label}
                                 className="px-3 py-1 text-sm text-gray-300 hover:bg-gray-700 rounded cursor-pointer flex justify-between items-center"
                                 onClick={() => {
-                                  console.log(
-                                    "i got clicked to see if it works",
-                                    label
-                                  );
-
                                   handleLabelSelection(label);
                                 }}
                               >
@@ -850,11 +823,6 @@ const TaskManager = () => {
                               key={label}
                               className="px-3 py-1 text-sm text-gray-300 hover:bg-gray-700 rounded cursor-pointer flex justify-between items-center"
                               onClick={() => {
-                                console.log(
-                                  "i got clicked to see if it works",
-                                  label
-                                );
-
                                 handleLabelSelection(label);
                               }}
                             >
@@ -902,10 +870,6 @@ const TaskManager = () => {
                     ) : (
                       <div className="flex flex-wrap gap-2">
                         {/* Display labels badges */}
-                        {console.log(
-                          "this is the selected task",
-                          selectedTask.labels
-                        )}
                         {Array.isArray(selectedTask.labels) &&
                           selectedTask.labels.map((label, index) => (
                             <Badge
