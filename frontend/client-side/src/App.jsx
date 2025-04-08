@@ -198,13 +198,20 @@ const TaskManager = () => {
   };
 
   const handleUpdateTask = async () => {
+    console.log("this is the edited task", editedTask);
+
     try {
       const token = localStorage.getItem("accessToken");
       const payload = {
         ...editedTask,
-        labels: editedTask.labels.map((label) =>
-          typeof label === "object" ? label.name : label
-        ),
+        scheduledFor: editedTask.scheduledFor || new Date().toISOString(),
+        published: true,
+        labels: editedTask.labels.map((label) => {
+          if (typeof label === "object" && label !== null && label.name) {
+            return label;
+          }
+          return { name: label };
+        }),
       };
 
       await axios.put(`http://localhost:8080/put/${editedTask.id}`, payload, {
@@ -543,8 +550,6 @@ const TaskManager = () => {
                   <div className="flex gap-1">
                     {Array.isArray(task.labels) &&
                       task.labels.map((label, index) => {
-                        console.log("this ius label", label);
-
                         const labelName =
                           typeof label === "object" ? label.name : label;
                         return (
