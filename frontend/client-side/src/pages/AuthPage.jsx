@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {client }from "../lib/axiosClient.js"
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { getRoot, postLogin } from '@/lib/services.js';
+import axios from 'axios';
 
 
 
@@ -25,40 +27,71 @@ const [loginPassword, setLoginPassword] = useState("");
 const [registerName, setRegisterName] = useState("");
 const [registerEmail, setRegisterEmail] = useState("");
 const [registerPassword, setRegisterPassword] = useState("");
-
+const [loading, setLoading] = useState(false)
 
 const navigate = useNavigate()
 
-const handleLogin = async() =>{
+
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    setLoading(false);
+    return;
+  }
+
+  axios.get(`${baseUrl}/users/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then((res) => {
+    setUser(res.data);
+  })
+  .catch(() => {
+    localStorage.removeItem('token');
+  })
+  .finally(() => {
+    setLoading(false);
+  });
+}, []);
+
+
+const handleLogin = async () =>{
+  console.log("i get ran");
+  
     try {
-        const res = await client.post("/auth/login", {
-            email: email,
-            password: password
-            
-        })
-        const {accessToken, refreshToken} = res.data
-        localStorage.setItem("accessToken", accessToken)
-        localStorage.setItem("refreshToken", refreshToken)
-        navigate("/")
+      console.log("i get ran2");
+      const res =   await axios.post("http://localhost:8080/auth/login",{
+        email: loginEmail,
+        password: loginPassword
+      });
+      console.log(res);
+      
+      const {accessToken, refreshToken} = res.data
+      localStorage.setItem("accessToken", accessToken)
+      localStorage.setItem("refreshToken", refreshToken)
+      navigate("/dashboard")
     } catch (error) {
-        alert("login failed : ", error.response?.data?.message || "server error")
+        console.log("login failed : ", error || "server error")
     }
 }
 
 const handleRegister = async()=>{
     try {
-        const res = await client.post("/auth/register", {
-            name : name,
-            email: email,
-            psasword: password
+        const res = await axios.post("http://localhost:8080/auth/register", {
+            name : registerName,
+            email: registerEmail,
+            password: registerPassword
         })
 
         const {accessToken, refreshToken} = res.data
 
         localStorage.setItem("accessToken", accessToken)
         localStorage.setItem("refreshToken", refreshToken)
+        navigate("/dashboard")
     } catch (error) {
-        alert("Registration failed: ", error.response?.data?.message  || "server error baby")
+        
+      console.log("Registration failed: ", error.response?.data?.message  || "server error baby")
     }
 }
   
@@ -118,19 +151,6 @@ const handleRegister = async()=>{
                       </span>
                     </Button>
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="remember"
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <Label htmlFor="remember" className="text-sm font-normal">Remember me</Label>
-                  </div>
-                  <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                    Forgot password?
-                  </a>
                 </div>
               </CardContent>
               <CardFooter>

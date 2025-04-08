@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - one_week_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:Schwanz@!@23@postgres:5432/mydb?schema=public
+    networks:
+      - one_week_network
+
+  db:
+    container_name: postgres_db
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Schwanz@!@23
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    hostname: postgres
+    networks:
+      - one_week_network
+
+networks:
+  one_week_network:
+    driver: bridge

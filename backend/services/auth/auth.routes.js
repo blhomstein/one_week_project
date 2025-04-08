@@ -27,6 +27,7 @@ router.post('/register', async (req, res, next)=>{
             return res.status(400).json({message: err.details[0].message})
         }
         const {email,password,name} = req.body
+        console.log(req.body);
         if(!email || !password || !name){
             return res.status(400).json({message: "please provide all necessary informations"})
         }
@@ -76,8 +77,8 @@ router.post('/login', async(req,res,next)=>{
         const {refreshToken, accessToken} = generateTokens(existingUser)
         console.log("5");
         await addRefereshTokenToWhitelist({refreshToken: refreshToken, userId: existingUser.id})
-        console.log("6");
-        res.json({accessToken, refreshToken})
+        console.log(refreshToken, accessToken);
+        return res.json({accessToken, refreshToken})
 
     } catch (error) {
         return res.status(500).json({message: "sorry theres an error ://"})

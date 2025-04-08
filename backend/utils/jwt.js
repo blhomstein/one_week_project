@@ -11,7 +11,7 @@ dotenv.config({ path: './.env' });
 function generateAccessToken (user){
     console.log("im in generate access token function ", process.env.DATABASE_URL, "and", process.env.JWT_ACCESS_TOKEN);
     const signature = jwt.sign({userId: user.id}, process.env.JWT_ACCESS_TOKEN,{
-        expiresIn: '5min'
+        expiresIn: '90min'
     })
 
     console.log("this is the signature", jwt.decode(signature));

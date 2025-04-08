@@ -11,6 +11,10 @@ class AxiosInterceptor {
       ...instanceConfig,
     });
 
+    
+console.log("iu do also get logged ;)");
+
+
     // Add request interceptor that attaches access token to auth header in http request 
     this.axiosInstance.interceptors.request.use(
       (config) => {
@@ -83,13 +87,22 @@ class AxiosInterceptor {
 
     // Bind instance methods for convenience
     
-    this.get = this.axiosInstance.get.bind(this.axiosInstance);
+    this.get = async () => {
+      this.axiosInstance.get.bind(this.axiosInstance);
+    }
 
-    this.post = this.axiosInstance.post.bind(this.axiosInstance);
+    this.post = async () => {
+      console.log("poat");
+      
+      this.axiosInstance.post.bind(this.axiosInstance);
+    }
+    this.put = async () => {
+      this.axiosInstance.put.bind(this.axiosInstance);
+    }
 
-    this.put = this.axiosInstance.put.bind(this.axiosInstance);
-
-    this.delete = this.axiosInstance.delete.bind(this.axiosInstance);
+    this.delete = async () => {
+      this.axiosInstance.delete.bind(this.axiosInstance);
+    }
   }
 
   
@@ -125,6 +138,7 @@ class AxiosInterceptor {
     return response.data; // Expecting { accessToken: string, refreshToken: string }
   }
 }
+
 
 // Export a pre-configured instance of AxiosInterceptor
 export const client = new AxiosInterceptor({
