@@ -202,21 +202,17 @@ const TaskManager = () => {
       const token = localStorage.getItem("accessToken");
       const payload = {
         ...editedTask,
-        scheduledFor: editedTask.scheduledFor || new Date().toISOString(),
-        published: true,
-        labels: editedTask.labels.map((label) => ({ name: label })),
+        labels: editedTask.labels.map((label) =>
+          typeof label === "object" ? label.name : label
+        ),
       };
 
       await axios.put(`http://localhost:8080/put/${editedTask.id}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const response = await axios.get("http://localhost:8080/getAll", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const processedTasks = response.data.blogs.map((task) => ({
@@ -225,12 +221,10 @@ const TaskManager = () => {
           typeof label === "object" ? label.name : label
         ),
       }));
-      setTasks(processedTasks);
 
+      setTasks(processedTasks);
+      setSelectedTask(processedTasks.find((t) => t.id === editedTask.id));
       setEditingTask(null);
-      setSelectedTask(
-        response.data.blogs.find((task) => task.id === editingTask.id)
-      );
     } catch (error) {
       console.error("Error updating task:", error);
     }
@@ -549,7 +543,10 @@ const TaskManager = () => {
                   <div className="flex gap-1">
                     {Array.isArray(task.labels) &&
                       task.labels.map((label, index) => {
-                        const labelName = label?.name || label;
+                        console.log("this ius label", label);
+
+                        const labelName =
+                          typeof label === "object" ? label.name : label;
                         return (
                           <Badge key={index} className="bg-gray-700 text-xs">
                             {labelName}
