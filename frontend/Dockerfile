@@ -6,10 +6,10 @@ COPY . .
 
 WORKDIR /app/client-side
 
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
-RUN npm install react-router-dom --save
+# RUN npm install react-router-dom --save
 
 EXPOSE 5173
 
-CMD [ "sh", "-c", "npm install && npm run dev" ]
+CMD [ "sh", "-c", "npm run dev" ]
