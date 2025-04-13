@@ -22,6 +22,7 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:Schwanz@!@23@postgres:5432/mydb?schema=public
+      - JWT_ACCESS_TOKEN=SOMESECRETPHRASE
     networks:
       - one_week_network
 
