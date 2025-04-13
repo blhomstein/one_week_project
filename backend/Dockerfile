@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD [ "sh", "-c", "npx prisma generate && npx prisma db push && node index.js" ]
+CMD [ "sh", "-c", "npx prisma generate && npx prisma db push --accept-data-loss && node index.js" ]
